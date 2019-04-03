@@ -328,10 +328,18 @@ export default class Tile {
         const single_layer = (Object.keys(source_data.layers).length === 1 && Object.keys(source_data.layers)[0]);
 
         if (source_config != null && source_data != null && source_data.layers != null) {
+            // If source layer is wildcard, combine all source layers
+            if (source_config.layer === '*') {
+                for (const layer in source_data.layers) {
+                    if (source_data.layers[layer].features) {
+                        layers.push({ layer, geom: source_data.layers[layer] });
+                    }
+                }
+            }
             // If no source layer specified:
             // 1. Look for a source layer that matches the scene layer name
             // 2. If not, but the source only has one layer, use that as the default
-            if (!source_config.layer && (scene_layer || single_layer)) {
+            else if (!source_config.layer && (scene_layer || single_layer)) {
                 layers.push({
                     layer: scene_layer,
                     geom: source_data.layers[scene_layer] || source_data.layers[single_layer]
